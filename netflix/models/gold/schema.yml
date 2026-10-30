@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: dim_movies
+    description: "Movie dimension with external links"
+    columns:
+      - name: movie_id
+        description: "Primary key; unique guards against join fan-out"
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        data_tests:
+          - not_null
+
+  - name: fct_ratings
+    description: "One rating per user and movie"
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [user_id, movie_id]
+    columns:
+      - name: user_id
+        data_tests:
+          - not_null
+      - name: movie_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_movies')
+                field: movie_id
+      - name: rating
+        data_tests:
+          - not_null
+          - is_between:
+              arguments:
+                min_value: 0.5
+                max_value: 5.0
+      - name: rated_at
+        data_tests:
+          - not_null
+          - not_in_future
+
+  - name: fct_tags
+    description: "User tags on movies"
+    columns:
+      - name: movie_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_movies')
+                field: movie_id
+      - name: tag_name
+        data_tests:
+          - not_null
+          - is_clean_text
+
+  - name: brg_movie_genres
+    description: "Bridge between movies and genres"
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [movie_id, genre]
+    columns:
+      - name: movie_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_movies')
+                field: movie_id
+
+  - name: dim_movies_scd1
+    description: "SCD1 movies: changes overwrite the existing row"
+    columns:
+      - name: movie_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_movies_scd2
+    description: "SCD2 movies: one row per version, built from movies_snapshot"
+    columns:
+      - name: movie_version_key
+        data_tests:
+          - unique
+          - not_null
+      - name: movie_id
+        data_tests:
+          - not_null

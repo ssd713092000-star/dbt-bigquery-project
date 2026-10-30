@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: test_source
+    # The actual BigQuery dataset where the raw table exists
+    schema: dbt_test
+    tables:
+      - name: movies
+      - name: tags
+      - name: ratings
+      - name: links

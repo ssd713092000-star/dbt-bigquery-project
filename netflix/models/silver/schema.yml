@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: int_ratings_cleaned
+    description: "Valid ratings, latest per user and movie"
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [user_id, movie_id]
+    columns:
+      - name: user_id
+        data_tests:
+          - not_null
+      - name: movie_id
+        data_tests:
+          - not_null
+      - name: rating
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
+                quote: false
+
+  - name: int_tags_cleaned
+    description: "Normalized, deduplicated tags"
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [user_id, movie_id, tag, tagged_at]
+    columns:
+      - name: tag
+        data_tests:
+          - not_null
+          - is_clean_text
+
+  - name: int_movies_cleaned
+    description: "Movies with genres as an array"
+    columns:
+      - name: movie_id
+        data_tests:
+          - unique
+          - not_null
+      - name: genre_array
+        data_tests:
+          - array_not_empty
+
+  - name: int_movies_genres
+    description: "One row per movie and genre"
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [movie_id, genre]
+    columns:
+      - name: genre
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Action, Adventure, Animation, Children, Comedy, Crime, Documentary,
+                         Drama, Fantasy, Film-Noir, Horror, IMAX, Musical, Mystery, Romance,
+                         Sci-Fi, Thriller, War, Western, Unknown]
+              config:
+                severity: warn
+
+  - name: int_links_cleaned
+    description: "Links with derived IMDb code and URL"
+    columns:
+      - name: movie_id
+        data_tests:
+          - unique
+          - not_null
+      - name: imdb_code
+        data_tests:
+          - matches_regex:
+              arguments:
+                pattern: '^tt[0-9]{7,}$'
+      - name: imdb_url
+        data_tests:
+          - matches_regex:
+              arguments:
+                pattern: '^https://www\.imdb\.com/title/tt[0-9]{7,}/$'

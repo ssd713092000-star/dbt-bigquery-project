@@ -1,0 +1,14 @@
+[project]
+name = "dbt-learn2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "swayamdas1309", email = "142828299+swayamdas1309@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "dbt-bigquery>=1.12.1",
+    "dbt-core>=1.12.6",
+]
+

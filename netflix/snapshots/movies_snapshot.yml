@@ -1,0 +1,12 @@
+snapshots:
+  - name: movies_snapshot
+    description: "SCD2 history of the movies catalog"
+    relation: ref('stg_movies')
+    config:
+      schema: dbt_snapshots
+      unique_key: movie_id
+      # raw table has no updated_at, so detect changes by comparing these columns
+      strategy: check
+      check_cols: [title, genres]
+      # close the current version when a movie disappears from the source
+      hard_deletes: invalidate
